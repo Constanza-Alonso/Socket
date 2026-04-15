@@ -113,7 +113,7 @@ public class Servidor {
         
         // Respuesta por defecto (eco con info)
         return "Servidor recibió: \"" + mensaje + "\". " +
-               "Tip: usá RESOLVE \"expresión\" para calcular, o AYUDA para ver comandos.";
+               "Tip: usá RESOLVE \"expresión\" para calcular| MAYUS \"texto\" o AYUDA para ver comandos.";
     }
 
     /**
