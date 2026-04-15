@@ -108,11 +108,7 @@ public class Servidor {
 
         // Comando de ayuda
         if (upper.equals("AYUDA") || upper.equals("HELP")) {
-            return "Comandos disponibles:\n" +
-                   "  RESOLVE \"expresion\" -> Resuelve una expresión matemática\n" +
-                   "    Ejemplo: RESOLVE \"45*23/54+234\"\n" +
-                   "  SALIR               -> Cierra la conexión\n" +
-                   "  AYUDA               -> Muestra este mensaje";
+            return "Comandos: RESOLVE \"expresion\" | MAYUS \"texto\" | SALIR | AYUDA";
         }
         
         // Respuesta por defecto (eco con info)
