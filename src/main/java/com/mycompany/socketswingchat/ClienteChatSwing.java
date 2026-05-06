@@ -23,16 +23,19 @@ public class ClienteChatSwing extends JFrame {
 
     private JLabel labelEscribiendo;
     private Timer timerEscribiendo;
+    private Color colorUsuario;
     
     private JList<String> listaUsuarios;
     private Map<String, Color> coloresUsuarios = new HashMap<>();
 
     public ClienteChatSwing() {
-        usuario = pedirUsuarioValido();
-        configurarVentana();
-        conectarServidor();
-        escucharMensajes();
-    }
+    usuario = pedirUsuarioValido();
+    colorUsuario = elegirColor();
+
+    configurarVentana();
+    conectarServidor();
+    escucharMensajes();
+}
 
     private String pedirUsuarioValido() {
         String nombre;
@@ -66,7 +69,9 @@ public class ClienteChatSwing extends JFrame {
                     JOptionPane.ERROR_MESSAGE
             );
         }
+        
     }
+    
 
     private boolean validarUsuario(String usuario) {
         return usuario.matches("^[A-Za-z0-9_]{3,15}$");
@@ -156,7 +161,13 @@ public class ClienteChatSwing extends JFrame {
             entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             salida = new PrintWriter(socket.getOutputStream(), true);
 
-            salida.println(usuario);
+            String colorHex = String.format("#%02x%02x%02x",
+             colorUsuario.getRed(),
+             colorUsuario.getGreen(),
+             colorUsuario.getBlue()
+                    );
+
+            salida.println(usuario + "|" + colorHex);
 
             String respuestaInicial = entrada.readLine();
 
@@ -240,7 +251,7 @@ public class ClienteChatSwing extends JFrame {
 
     private void mostrarMensajeConColor(String msg) {
         String contenido = msg.substring(4);
-        String[] partes = contenido.split("\\|", 3);
+        String[] partes = contenido.split("\\|", 4);
 
         if (partes.length < 3) {
             appendNormal(msg);
@@ -250,6 +261,8 @@ public class ClienteChatSwing extends JFrame {
         String user = partes[0];
         String hora = partes[1];
         String texto = partes[2];
+        String colorHex = partes.length > 3 ? partes[3] : "#000000";
+        Color colorMensaje = Color.decode(colorHex);
 
         boolean esPrivado = texto.contains("[Privado]")
                 || texto.contains("Privado para")
@@ -260,12 +273,12 @@ public class ClienteChatSwing extends JFrame {
             Style style = areaChat.addStyle("Estilo_" + user, null);
 
             if (user.equals(usuario)) {
-                StyleConstants.setForeground(style, Color.BLUE);
-                StyleConstants.setBold(style, true);
-            } else {
-                StyleConstants.setForeground(style, obtenerColor(user));
-                StyleConstants.setBold(style, false);
-            }
+    StyleConstants.setForeground(style, colorUsuario);
+    StyleConstants.setBold(style, true);
+} else {
+    StyleConstants.setForeground(style, colorMensaje);
+    StyleConstants.setBold(style, false);
+}
 
             if (esPrivado) {
                 StyleConstants.setItalic(style, true);
@@ -421,5 +434,15 @@ public class ClienteChatSwing extends JFrame {
     timerEscribiendo = new Timer(1500, e -> labelEscribiendo.setText(" "));
     timerEscribiendo.setRepeats(false);
     timerEscribiendo.start();
+}
+    
+    private Color elegirColor() {
+    Color color = JColorChooser.showDialog(
+            this,
+            "Elegí tu color de chat",
+            Color.BLUE
+    );
+
+    return (color != null) ? color : Color.BLUE;
 }
 }

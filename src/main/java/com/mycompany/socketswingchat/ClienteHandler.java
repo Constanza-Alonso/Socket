@@ -8,6 +8,7 @@ public class ClienteHandler implements Runnable {
     private Socket socket;
     private PrintWriter salida;
     private String nombreUsuario;
+    private String colorUsuario;
 
     public ClienteHandler(Socket socket) {
         this.socket = socket;
@@ -21,7 +22,13 @@ public class ClienteHandler implements Runnable {
         ) {
             salida = new PrintWriter(socket.getOutputStream(), true);
 
-            nombreUsuario = entrada.readLine();
+            String linea = entrada.readLine();
+            String[] partes = linea.split("\\|");
+
+            nombreUsuario = partes[0];
+            String colorHex = partes.length > 1 ? partes[1] : "#0000FF";
+            
+            this.colorUsuario = colorHex;
             
             // Validacion de usuario repetido
             if (ServidorChat.usuarios.contains(nombreUsuario)) {
@@ -57,7 +64,7 @@ public class ClienteHandler implements Runnable {
                 if (mensaje.startsWith("/privado ")) {
                 enviarPrivado(mensaje, hora);
                } else {
-                enviarATodos("MSG:" + nombreUsuario + "|" + hora + "|" + mensaje);
+                enviarATodos("MSG:" + nombreUsuario + "|" + hora + "|" + mensaje + "|" + colorUsuario);
                   }
             }
 
@@ -114,7 +121,7 @@ public class ClienteHandler implements Runnable {
     synchronized (ServidorChat.clientes) {
         for (ClienteHandler cliente : ServidorChat.clientes) {
             if (cliente.nombreUsuario != null && cliente.nombreUsuario.equalsIgnoreCase(destinatario)) {
-                cliente.salida.println("MSG:" + nombreUsuario + "|" + hora + "|[Privado] " + textoPrivado);
+                cliente.salida.println("MSG:" + nombreUsuario + "|" + hora + "|[Privado] " + textoPrivado + "|" + colorUsuario);
                 encontrado = true;
                 break;
             }
@@ -122,7 +129,7 @@ public class ClienteHandler implements Runnable {
     }
 
     if (encontrado) {
-        salida.println("MSG:" + nombreUsuario + "|" + hora + "|[✔✔ Privado para " + destinatario + "] " + textoPrivado);
+        salida.println("MSG:" + nombreUsuario + "|" + hora + "|[✔✔ Privado para " + destinatario + "] " + textoPrivado + "|" + colorUsuario);
     } else {
         salida.println("Servidor: Usuario no encontrado: " + destinatario);
     }
